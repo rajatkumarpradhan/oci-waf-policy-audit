@@ -1,0 +1,25 @@
+{
+  "waf_policies": [
+    {
+      "name": "edge-waf-prod",
+      "listeners": [
+        {"name": "https-listener", "protocol": "HTTPS", "port": 443}
+      ],
+      "access_rules": [
+        {"name": "admin-vpn-only", "action": "ALLOW", "condition": "http.request.url.path sw '/admin' and i_in(http.request.remoteAddress, 'vpn-exits')"},
+        {"name": "default-check", "action": "CHECK", "condition": ""}
+      ],
+      "rate_limiting": {"enabled": true, "requests_per_second": 200, "action": "BLOCK"},
+      "request_protection": {
+        "enabled": true,
+        "capabilities": [
+          {"name": "SQL Injection", "version": 3, "enabled": true},
+          {"name": "Cross-Site Scripting", "version": 3, "enabled": true}
+        ]
+      },
+      "address_lists": [
+        {"name": "vpn-exits", "type": "WHITELIST", "addresses": ["203.0.113.8/32", "203.0.113.9/32"]}
+      ]
+    }
+  ]
+}
