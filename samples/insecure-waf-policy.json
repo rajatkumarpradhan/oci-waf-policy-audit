@@ -1,0 +1,42 @@
+{
+  "waf_policies": [
+    {
+      "name": "edge-waf-dev",
+      "listeners": [
+        {"name": "http-listener", "protocol": "HTTP", "port": 80},
+        {"name": "https-listener", "protocol": "HTTPS", "port": 443}
+      ],
+      "access_rules": [
+        {"name": "allow-admin", "action": "ALLOW", "condition": "http.request.url.path sw '/admin'"},
+        {"name": "block-probes", "action": "BLOCK", "condition": "http.request.url.path co '/.git'"}
+      ],
+      "rate_limiting": {"enabled": false, "requests_per_second": 500, "action": "BLOCK"},
+      "request_protection": {
+        "enabled": true,
+        "capabilities": [
+          {"name": "SQL Injection", "version": 3, "enabled": false},
+          {"name": "Cross-Site Scripting", "version": 3, "enabled": false}
+        ]
+      },
+      "address_lists": [
+        {"name": "trusted", "type": "WHITELIST", "addresses": ["0.0.0.0/0"]}
+      ]
+    },
+    {
+      "name": "internal-waf",
+      "listeners": [
+        {"name": "https-listener", "protocol": "HTTPS", "port": 443}
+      ],
+      "access_rules": [],
+      "request_protection": {
+        "enabled": true,
+        "capabilities": [
+          {"name": "SQL Injection", "version": 3, "enabled": true}
+        ]
+      },
+      "address_lists": [
+        {"name": "corp", "type": "WHITELIST", "addresses": ["10.20.0.0/16"]}
+      ]
+    }
+  ]
+}
